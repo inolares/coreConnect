@@ -219,7 +219,6 @@ abstract class coreConnectBase
    */
   public function FetchToken():string
     {
-    error_log("FETCH TOKEN CALLED");
     $copts = array(
       CURLOPT_HTTPAUTH      => CURLAUTH_BASIC,
       CURLOPT_USERPWD       => $this->getApiUser() . ':' . $this->getApiPass(),

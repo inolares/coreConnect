@@ -11,7 +11,7 @@ session_name("ccManTestSession");
 session_start();
 
 $cc = new coreConnectSession();
-$cc->Init('admin@localhost','admin2k19','http://inocore.fritz.box');
+$cc->Init('purebasic@localhost','purebasic','http://inocore.fritz.box');
 
 echo "\nTesting v1/ping:\n";
 
