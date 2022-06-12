@@ -174,7 +174,7 @@ abstract class coreConnectBase
    * @return bool
    * @throws Exception
    */
-  public function Init(string $user,string $pass, string $apiurl):bool
+  public function init(string $user,string $pass, string $apiurl):bool
     {
     if(filter_var($apiurl, FILTER_VALIDATE_URL) === false)
       {
@@ -184,6 +184,19 @@ abstract class coreConnectBase
     $this->setApiUser($user);
     $this->setApiPass($pass);
     return true;
+    }
+  
+  /**
+   * Clears all crendentials from configured storage.
+   * @return void
+   */
+  public function clearCredentials():void
+    {
+    $this->setApiUser("");
+    $this->setApiPass("");
+    $this->setApiUrl("");
+    $this->setExpires(-1);
+    $this->setJwtUser("");
     }
   
   /**
@@ -202,9 +215,9 @@ abstract class coreConnectBase
       {
       if($this->getApiUser() === "")
         {
-        throw new InvalidArgumentException('No credentials found - make sure to set them on initial login!!!!');
+        throw new InvalidArgumentException('No credentials found - make sure to call Init() first!');
         }
-      $token = $this->FetchToken();
+      $this->FetchToken();
       if($this->getToken() === "")
         {
         return false;
@@ -225,6 +238,7 @@ abstract class coreConnectBase
       CURLOPT_URL           => $this->getApiUrl().'token',
       CURLOPT_CUSTOMREQUEST => self::METHOD_POST,
       );
+    $this->lastApiUrl = "token";
     curl_setopt_array($this->curl,$copts);
     $result = curl_exec($this->curl);
     if($result === FALSE)
@@ -310,7 +324,7 @@ abstract class coreConnectBase
     $result = curl_exec($this->curl);
     if($result === FALSE)
       {
-      throw new Exception(curl_error($this->curl)." [APICALL: {$this->lastApiUrl}]",1);
+      throw new Exception(curl_error($this->curl)." [APICALL: {$this->getLastUrl()}]",1);
       }
     $httpCode = curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
     return $this->prepareResponse($result, $httpCode);

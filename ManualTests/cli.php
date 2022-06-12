@@ -1,18 +1,24 @@
-<?php declare(strict_types=1);
+<?php
+/**
+ * Test for CLI class.
+ * @package coreConnect
+ * @author Sascha 'SieGeL' Pfalz <s.pfalz@inolares.de>
+ * @version 1.0.0 (12-Jun-2022)
+ */
 
-use inolares\coreConnectSession;
-
-echo "<pre>";
+use inolares\coreConnectCLI;
 
 require_once '../coreConnectBase.php';
-require_once '../coreConnectSession.php';
+require_once '../coreConnectCLI.php';
 
-session_name("ccManTestSession");
-session_start();
+if(php_sapi_name() != 'cli')
+  {
+  die("Script is meant to be started on CLI only!");
+  }
 
 try
   {
-  $cc = new coreConnectSession();
+  $cc = new coreConnectCLI();
   // We clear first our credentials list to allow testing new creds
   $cc->clearCredentials();
   $cc->init('purebasic@localhost','purebasic','http://inocore.fritz.box');
@@ -25,4 +31,3 @@ catch(Exception $e)
   {
   die("InoCore Error: ".$e->getMessage());
   }
-
