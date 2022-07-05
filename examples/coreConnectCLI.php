@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Use this class as an example how to implement for non-session scripts, i.e. CLI.
  * @package coreConnect

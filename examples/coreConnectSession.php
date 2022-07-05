@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Class uses PHP's session storage to store InoCore credentials.
  * Use this class for plain PHP scripts that have an active session.

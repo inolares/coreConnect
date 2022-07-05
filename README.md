@@ -25,7 +25,7 @@ PureBasic inside the contrib folder.
 Best way is to install everything via composer by executing the following line
 in your project directory:
 
-``composer require inolares/coreConnect``
+``composer require inolares/coreconnect``
 
 If you do not use composer or would like to install it manually just copy at
 least the base class "coreConnectBase.php" and one of the support classes that

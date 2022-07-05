@@ -1,0 +1,28 @@
+{
+  "name": "inolares/coreconnect",
+  "type": "library",
+  "description": "coreConnect class for communication between client and InoCore",
+  "keywords": ["rest","class","InoCore","API"],
+  "homepage": "https://github.com/inolares",
+  "minimum-stability": "stable",
+  "license": "BSD-3-Clause",
+  "authors": [
+    {
+      "name": "Sascha Pfalz",
+      "email": "s.pfalz@inolares.de",
+      "homepage": "https://www.inolares.de",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "email": "info@inolares.de"
+  },
+  "autoload": {
+    "files": ["coreConnectBase.php"]
+  },
+  "require": {
+    "php": ">=7.0||^8.0",
+    "ext-curl": "*",
+    "ext-json": "*"
+    }
+}
