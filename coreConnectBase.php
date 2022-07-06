@@ -4,7 +4,7 @@
  * @package coreConnect
  * @author Sascha 'SieGeL' Pfalz <s.pfalz@inolares.de>
  * @copyright Inolares GmbH & Co. KG
- * @version 2.0.0 (11-Jun-2022)
+ * @version 2.0.1 (07-Jul-2022)
  * @license BSD
  */
 
@@ -23,7 +23,7 @@ use InvalidArgumentException;
 abstract class coreConnectBase
   {
   /** @var string Class version */
-  const CLASS_VERSION = '2.0.0';
+  const CLASS_VERSION = '2.0.1';
   
   /**
    * Sets API url
