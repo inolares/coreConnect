@@ -51,7 +51,7 @@ Copy the supplied file "examples/coreConnectService.php" to your "src/Service"
 folder.
 Now you can use DI to get a reference to the coreConnectService, i.e.:
 ````
-public function __construct(CoreConnectService $coreConnect) {
+public function __construct(coreConnectService $coreConnect) {
   parent::__construct();
   $coreConnect = $coreConnect;
   $coreConnect->init($user,$pass,$url);
