@@ -4,7 +4,7 @@
  * @package coreConnect
  * @author Sascha 'SieGeL' Pfalz <s.pfalz@inolares.de>
  * @copyright Inolares GmbH & Co. KG
- * @version 2.0.1 (07-Jul-2022)
+ * @version 2.0.2 (02-Aug-2022)
  * @license BSD
  */
 
@@ -23,7 +23,7 @@ use InvalidArgumentException;
 abstract class coreConnectBase
   {
   /** @var string Class version */
-  const CLASS_VERSION = '2.0.1';
+  const CLASS_VERSION = '2.0.2';
   
   /**
    * Sets API url
@@ -148,6 +148,7 @@ abstract class coreConnectBase
     {
     if(function_exists('curl_init') === false)
       {
+      error_log(__METHOD__.": cURL extension is missing!");
       throw new BadMethodCallException("cURL extension is missing!");
       }
     $this->curl     = curl_init();
@@ -162,6 +163,7 @@ abstract class coreConnectBase
       );
     if(curl_setopt_array($this->curl,$curloptions) === false)
       {
+      error_log(__METHOD__.": curl_setopt_array() failed: ".curl_error($this->curl));
       throw new Exception(curl_error($this->curl));
       }
     }
@@ -178,7 +180,8 @@ abstract class coreConnectBase
     {
     if(filter_var($apiurl, FILTER_VALIDATE_URL) === false)
       {
-      throw new Exception("API Url is not valid!");
+      error_log(__METHOD__.": API URL is not valid!");
+      throw new Exception("API URL is not valid!");
       }
     $this->setApiUrl( rtrim($apiurl, '/') . '/');
     $this->setApiUser($user);
@@ -215,7 +218,8 @@ abstract class coreConnectBase
       {
       if($this->getApiUser() === "")
         {
-        throw new InvalidArgumentException('No credentials found - make sure to call Init() first!');
+        error_log(__METHOD__.": No credentials found - make sure to call init() first!");
+        throw new InvalidArgumentException('No credentials found - make sure to call init() first!');
         }
       $this->FetchToken();
       if($this->getToken() === "")
@@ -243,23 +247,28 @@ abstract class coreConnectBase
     $result = curl_exec($this->curl);
     if($result === FALSE)
       {
+      $this->setToken("");
+      error_log(__METHOD__.": curl_exec() failed: ".curl_error($this->curl));
       throw new Exception(curl_error($this->curl),1);
       }
     $httpCode = (int)curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
     if($httpCode !== 201)
       {
-      error_log("coreConnectBase/GetToken(): Unauthorized [$httpCode]!");
+      $this->setToken("");
+      error_log(__METHOD__.": Unauthorized [$httpCode]!");
       throw new Exception("Unauthorized",$httpCode);
       }
     $tk = json_decode($result,true);
     if($tk === false)
       {
-      error_log("coreConnectBase/GetToken(): JSON decode failed: ".$this->jsonErrors[json_last_error()]);
+      $this->setToken("");
+      error_log(__METHOD__.": JSON decode failed: ".$this->jsonErrors[json_last_error()]);
       throw new Exception('JSON error - cannot get token?');
       }
     if(isset($tk['token']) === false)
       {
-      error_log("coreConnectBase/GetToken(): No token data found in payload?");
+      $this->setToken("");
+      error_log(__METHOD__.": No token data found in payload?");
       throw new Exception('API error - cannot get token?');
       }
     // Newer versions of JWT returns a DateTimeImmutable object instead of a timestamp???? WTF?
@@ -296,11 +305,13 @@ abstract class coreConnectBase
     $this->lastApiUrl = $url;
     if (!in_array($method, $this->validMethods))
       {
+      error_log(__METHOD__.": Invalid HTTP method: ".$method);
       throw new Exception('Invalid HTTP method: ' . $method);
       }
     // At this stage communication can be done only via auth token!
     if($this->HasValidToken() === false)
       {
+      error_log(__METHOD__.": No token available?");
       throw new Exception("No token available?!");
       }
     $queryString = '';
@@ -324,6 +335,7 @@ abstract class coreConnectBase
     $result = curl_exec($this->curl);
     if($result === FALSE)
       {
+      error_log(__METHOD__.": curl_exec() failed: ".curl_error($this->curl));
       throw new Exception(curl_error($this->curl)." [APICALL: {$this->getLastUrl()}]",1);
       }
     $httpCode = curl_getinfo($this->curl, CURLINFO_HTTP_CODE);

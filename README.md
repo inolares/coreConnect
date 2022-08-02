@@ -9,16 +9,16 @@ for a specific requirement.
 Currently there are helper classes to integrate with session based PHP sites, 
 CLI commands and a Symfony 5.4+ compatible service.
 
-In addition you'll find implementations for other languages like Python or 
-PureBasic inside the contrib folder.
+In addition you'll find implementations for other languages like PureBasic 
+inside the contrib folder.
 
+For Python there exists an implementation which should be available via PIP install.
 
 ## REQUIREMENTS
 
 - PHP 8.0 or newer
 - InoCore installation with valid credentials
 - PureBasic must be at leat 5.73 or newer
-- Python 3.6 or higher
 - For Symfony at least 5.4 must be used
 
 ## INSTALLATION
