@@ -83,3 +83,12 @@ In addition, the following methods are implemented:
 - prepareResponse()
 - getLastUrl()
 
+
+## PHPUnit tests
+
+Some tests for PHPUnit are provided, to run these tests do the following:
+
+```
+$> composer install
+$> vendor/bin/phpunit tests
+```
