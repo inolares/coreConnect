@@ -4,7 +4,7 @@ use inolares\coreConnectSession;
 
 echo "<pre>";
 
-require_once '../coreConnectBase.php';
+require_once '../src/coreConnectBase.php';
 require_once '../examples/coreConnectSession.php';
 require_once 'credentials.inc.php';
 

@@ -2,6 +2,7 @@
 
 #### 03-Aug-2022
 
+- Added basic tests for phpUnit testing framework
 - Fixed bug whenever the token expires - the FetchToken() method had missed sending a normal HTTP header, instead it sends the Authorization: Bearer header, which is of course wrong.
 
 #### 02-Aug-2022

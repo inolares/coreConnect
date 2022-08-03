@@ -8,7 +8,7 @@
 
 use inolares\coreConnectCLI;
 
-require_once '../coreConnectBase.php';
+require_once '../src/coreConnectBase.php';
 require_once '../examples/coreConnectCLI.php';
 
 if(php_sapi_name() != 'cli')

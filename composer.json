@@ -3,7 +3,7 @@
   "type": "library",
   "description": "coreConnect class for communication between client and InoCore",
   "keywords": ["rest","class","InoCore","API"],
-  "homepage": "https://github.com/inolares",
+  "homepage": "https://github.com/inolares/coreConnect",
   "minimum-stability": "stable",
   "license": "BSD-3-Clause",
   "authors": [
@@ -18,11 +18,14 @@
     "email": "info@inolares.de"
   },
   "autoload": {
-    "files": ["coreConnectBase.php"]
+    "files": ["src/coreConnectBase.php"]
   },
   "require": {
-    "php": ">=^8.0",
+    "php": ">=8.0",
     "ext-curl": "*",
     "ext-json": "*"
-    }
+    },
+  "require-dev": {
+    "phpunit/phpunit": "^9"
+  }
 }
