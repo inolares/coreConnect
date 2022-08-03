@@ -241,6 +241,7 @@ abstract class coreConnectBase
       CURLOPT_USERPWD       => $this->getApiUser() . ':' . $this->getApiPass(),
       CURLOPT_URL           => $this->getApiUrl().'token',
       CURLOPT_CUSTOMREQUEST => self::METHOD_POST,
+      CURLOPT_HTTPHEADER    => ['Content-Type: application/json; charset=utf-8'],
       );
     $this->lastApiUrl = "token";
     curl_setopt_array($this->curl,$copts);
