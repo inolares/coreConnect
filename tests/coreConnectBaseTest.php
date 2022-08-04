@@ -2,6 +2,11 @@
 /**
  * Basic tests for coreConnectBase.php
  * Only concrete methods are tested!
+ * @package coreConnect
+ * @author Sascha 'SieGeL' Pfalz <s.pfalz@inolares.de>
+ * @copyright Inolares GmbH & Co. KG
+ * @version 2.0.2 (02-Aug-2022)
+ * @license BSD
  */
 
 use inolares\coreConnectBase;

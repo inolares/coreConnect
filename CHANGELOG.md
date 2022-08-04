@@ -1,5 +1,9 @@
 ## 2.0.2
 
+#### 04-Aug-2022
+
+- Public release
+
 #### 03-Aug-2022
 
 - Added basic tests for phpUnit testing framework
