@@ -1,3 +1,12 @@
+## 2.1.0
+
+#### 11-Aug-2023
+
+- Correct spelling of *Token() methods
+- Changed method signature of delete(url,params[]) to delete(url,postdata[],params[]) 
+- Implemented issue #2 (allow connection to self-signed certificates)
+- Fixed wrong lastApiUrl value if first call to API failed (token was always returned). 
+
 ## 2.0.2
 
 #### 04-Aug-2022

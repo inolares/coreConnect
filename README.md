@@ -7,12 +7,14 @@ To make integration easy multiple classes are provided, each of them integrates
 for a specific requirement.
 
 Currently there are helper classes to integrate with session based PHP sites, 
-CLI commands and a Symfony 5.4+ compatible service.
+CLI commands and a Symfony 5.4+ compatible service class.
 
-In addition you'll find implementations for other languages like PureBasic 
-inside the contrib folder.
+In addition you'll find implementations for other languages inside the contrib 
+folder, currently only for PureBasic, but others are welcome! :)
 
-For Python there exists an implementation which should be available via PIP install.
+Python users should take a look to our PIP package:
+https://pypi.org/project/core-connect/
+
 
 ## REQUIREMENTS
 
@@ -82,7 +84,7 @@ In addition, the following methods are implemented:
 - delete()
 - prepareResponse()
 - getLastUrl()
-
+- setCurlOpts()           [2.1.0+]
 
 ## PHPUnit tests
 
@@ -92,3 +94,24 @@ Some tests for PHPUnit are provided, to run these tests do the following:
 $> composer install
 $> vendor/bin/phpunit tests
 ```
+
+## Some hints
+
+#### Only valid for coreConnect 2.1.0 or newer!
+
+If you want to connect to an https-enabled InoCore instance using a self-signed
+certificate make sure to disable SSL peer verification first! To do this call
+this **BEFORE** init() is called:
+
+````
+$coreConnect->setCurlOpts([CURLOPT_SSL_VERIFYPEER => false]);
+````
+You can provide every CURLOPT_* constant here, but it is recommended to set only
+specific parameters for your specific setup and leave everything else at classes'
+default values!
+See https://www.php.net/manual/de/function.curl-setopt.php for a complete list.
+
+coreConnect would merge it's own config setup with your provided values before
+performing the API request to InoCore. It is also possible to change parameters
+between multiple API calls just by calling setCurlOpts() right before the API
+call is performed.

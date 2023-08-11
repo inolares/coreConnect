@@ -4,7 +4,7 @@
  * @package coreConnect
  * @author Sascha 'SieGeL' Pfalz <s.pfalz@inolares.de>
  * @copyright Inolares GmbH & Co. KG
- * @version 2.0.2 (02-Aug-2022)
+ * @version 2.1.0 (11-Aug-2023)
  * @license BSD
  */
 
@@ -23,8 +23,11 @@ use InvalidArgumentException;
 abstract class coreConnectBase
   {
   /** @var string Class version */
-  const CLASS_VERSION = '2.0.2';
+  const CLASS_VERSION = '2.1.0';
   
+  /** @var array $addOptions Optional array with additional cURL options */
+  private array $addOptions = [];
+
   /**
    * Sets API url
    * @param string $url
@@ -127,8 +130,9 @@ abstract class coreConnectBase
   protected array $jsonErrors = [
     JSON_ERROR_NONE                   => 'No error occurred',
     JSON_ERROR_DEPTH                  => 'The maximum stack depth has been reached',
+    JSON_ERROR_STATE_MISMATCH         => 'Invalid or malformed JSON',
     JSON_ERROR_CTRL_CHAR              => 'Control character issue, maybe wrong encoded',
-    JSON_ERROR_SYNTAX                 => 'Syntaxerror',
+    JSON_ERROR_SYNTAX                 => 'Syntax error',
     JSON_ERROR_UTF8 	                => 'Malformed UTF-8 characters, possibly incorrectly encoded',
     JSON_ERROR_RECURSION 	            => 'One or more recursive references in the value to be encoded',
     JSON_ERROR_INF_OR_NAN             => 'One or more NAN or INF values in the value to be encoded',
@@ -148,11 +152,11 @@ abstract class coreConnectBase
     {
     if(function_exists('curl_init') === false)
       {
-      error_log(__METHOD__.": cURL extension is missing!");
+      $this->errorLog(__METHOD__.": cURL extension is missing!");
       throw new BadMethodCallException("cURL extension is missing!");
       }
-    $this->curl     = curl_init();
-    $curloptions    = array(
+    $this->curl   = curl_init();
+    $curloptions  = array(
       CURLOPT_RETURNTRANSFER    => true,
       CURLOPT_FOLLOWLOCATION    => false,
       CURLOPT_USERAGENT         => self::USER_AGENT,
@@ -161,11 +165,37 @@ abstract class coreConnectBase
       CURLOPT_FRESH_CONNECT     => true,
       CURLOPT_BUFFERSIZE        => 1024*1024,
       );
-    if(curl_setopt_array($this->curl,$curloptions) === false)
+    if($this->setOpt($curloptions) === false)
       {
-      error_log(__METHOD__.": curl_setopt_array() failed: ".curl_error($this->curl));
+      $this->errorLog(__METHOD__.": curl_setopt_array() failed: ".curl_error($this->curl));
       throw new Exception(curl_error($this->curl));
       }
+    }
+  
+  /**
+   * Adds user options for cURL to internal class variable.
+   * @param array $opts
+   * @return void
+   * @since 2.1.0
+   */
+  public function setCurlOpts(array $opts):void
+    {
+    $this->addOptions = $opts;
+    }
+  
+  /**
+   * Wrapper for curl_setopt_array() to merge possible user config options.
+   * @param array $curloptions
+   * @return bool
+   * @since 2.1.0
+   */
+  private function setOpt(array $curloptions):bool
+    {
+    foreach($this->addOptions as $opt => $val)
+      {
+      $curloptions[$opt] = $val;
+      }
+    return curl_setopt_array($this->curl,$curloptions);
     }
   
   /**
@@ -180,7 +210,7 @@ abstract class coreConnectBase
     {
     if(filter_var($apiurl, FILTER_VALIDATE_URL) === false)
       {
-      error_log(__METHOD__.": API URL is not valid!");
+      $this->errorLog(__METHOD__.": API URL is not valid!");
       throw new Exception("API URL is not valid!");
       }
     $this->setApiUrl( rtrim($apiurl, '/') . '/');
@@ -209,7 +239,7 @@ abstract class coreConnectBase
    * @throws Exception
    * @throws InvalidArgumentException
    */
-  public function HasValidToken():bool
+  public function hasValidToken():bool
     {
     $tdate  = new DateTime(date("d.m.Y H:i:s",$this->getExpires()));
     $now    = new DateTime("now");
@@ -218,10 +248,10 @@ abstract class coreConnectBase
       {
       if($this->getApiUser() === "")
         {
-        error_log(__METHOD__.": No credentials found - make sure to call init() first!");
+        $this->errorLog(__METHOD__.": No credentials found - make sure to call init() first!");
         throw new InvalidArgumentException('No credentials found - make sure to call init() first!');
         }
-      $this->FetchToken();
+      $this->fetchToken();
       if($this->getToken() === "")
         {
         return false;
@@ -231,10 +261,10 @@ abstract class coreConnectBase
     }
   
   /**
-   * Retrieves access token and save it.
+   * Retrieve access token and saves it.
    * @throws Exception
    */
-  public function FetchToken():string
+  public function fetchToken():string
     {
     $copts = array(
       CURLOPT_HTTPAUTH      => CURLAUTH_BASIC,
@@ -243,33 +273,37 @@ abstract class coreConnectBase
       CURLOPT_CUSTOMREQUEST => self::METHOD_POST,
       CURLOPT_HTTPHEADER    => ['Content-Type: application/json; charset=utf-8'],
       );
-    $this->lastApiUrl = "token";
-    curl_setopt_array($this->curl,$copts);
+    if($this->setOpt($copts) === false)
+      {
+      $this->setToken("");
+      $this->errorLog(__METHOD__.": curl_setopt_array() failed: ".curl_error($this->curl));
+      throw new Exception(curl_error($this->curl));
+      }
     $result = curl_exec($this->curl);
     if($result === FALSE)
       {
       $this->setToken("");
-      error_log(__METHOD__.": curl_exec() failed: ".curl_error($this->curl));
+      $this->errorLog(__METHOD__.": curl_exec() failed: ".curl_error($this->curl));
       throw new Exception(curl_error($this->curl),1);
       }
     $httpCode = (int)curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
     if($httpCode !== 201)
       {
       $this->setToken("");
-      error_log(__METHOD__.": Unauthorized [$httpCode]!");
+      $this->errorLog(__METHOD__.": Unauthorized [$httpCode]!");
       throw new Exception("Unauthorized",$httpCode);
       }
     $tk = json_decode($result,true);
     if($tk === false)
       {
       $this->setToken("");
-      error_log(__METHOD__.": JSON decode failed: ".$this->jsonErrors[json_last_error()]);
+      $this->errorLog(__METHOD__.": JSON decode failed: ".$this->jsonErrors[json_last_error()]);
       throw new Exception('JSON error - cannot get token?');
       }
     if(isset($tk['token']) === false)
       {
       $this->setToken("");
-      error_log(__METHOD__.": No token data found in payload?");
+      $this->errorLog(__METHOD__.": No token data found in payload?");
       throw new Exception('API error - cannot get token?');
       }
     // Newer versions of JWT returns a DateTimeImmutable object instead of a timestamp???? WTF?
@@ -294,25 +328,25 @@ abstract class coreConnectBase
 
   /**
    * Generic HTTP call method.
-   * @param $url
-   * @param string $method
-   * @param array $data
-   * @param array $params
+   * @param string $url URL to API call without leading '/'
+   * @param string $method One of GET,POST,PUT,DELETE
+   * @param array $data Array will be added to cURL's POSTFIELDS option.
+   * @param array $params Optional data to be append onto the URL (!) as parameter
    * @return array
    * @throws Exception
    */
-  public function call($url, string $method = self::METHOD_GET, array $data = [], array $params = []):array
+  public function call(string $url, string $method = self::METHOD_GET, array $data = [], array $params = []):array
     {
     $this->lastApiUrl = $url;
     if (!in_array($method, $this->validMethods))
       {
-      error_log(__METHOD__.": Invalid HTTP method: ".$method);
+      $this->errorLog(__METHOD__.": Invalid HTTP method: ".$method);
       throw new Exception('Invalid HTTP method: ' . $method);
       }
     // At this stage communication can be done only via auth token!
-    if($this->HasValidToken() === false)
+    if($this->hasValidToken() === false)
       {
-      error_log(__METHOD__.": No token available?");
+      $this->errorLog(__METHOD__.": No token available?");
       throw new Exception("No token available?!");
       }
     $queryString = '';
@@ -332,12 +366,16 @@ abstract class coreConnectBase
         'Authorization: Bearer ' . $this->getToken(),
         ],
       );
-    curl_setopt_array($this->curl,$copt);
+    if($this->setOpt($copt) === false)
+      {
+      $this->errorLog(__METHOD__.": curl_setopt_array() failed: ".curl_error($this->curl));
+      throw new Exception(curl_error($this->curl));
+      }
     $result = curl_exec($this->curl);
     if($result === FALSE)
       {
-      error_log(__METHOD__.": curl_exec() failed: ".curl_error($this->curl));
-      throw new Exception(curl_error($this->curl)." [APICALL: {$this->getLastUrl()}]",1);
+      $this->errorLog(__METHOD__.": curl_exec() failed: ".curl_error($this->curl));
+      throw new Exception(curl_error($this->curl)." [APICALL22: {$this->getLastUrl()}]",1);
       }
     $httpCode = curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
     return $this->prepareResponse($result, $httpCode);
@@ -383,14 +421,15 @@ abstract class coreConnectBase
   
   /**
    * Perform a DELETE request.
-   * @param string $url
-   * @param array $params
+   * @param string $url API call
+   * @param array $data POSTFIELD vars
+   * @param array $params Params to attach to url
    * @return array
    * @throws Exception
    */
-  public function delete(string $url, array $params = []): array
+  public function delete(string $url, array $data = [], array $params = []): array
     {
-    return $this->call($url, self::METHOD_DELETE, [], $params);
+    return $this->call($url, self::METHOD_DELETE, $data, $params);
     }
   
   /**
@@ -403,9 +442,6 @@ abstract class coreConnectBase
    */
   protected function prepareResponse(string $result, int $httpCode):array
     {
-    //error_log("---=---=------=------=------=------=------=------=------=------=------=---");
-    //error_log(var_export($result,true));
-    //error_log("--------------------------------------------------------------------------");
     if (null === $decodedResult = json_decode($result, true))
       {
       throw new Exception('Could not decode json: '.$this->jsonErrors[json_last_error()].' [HTTP code: '.$httpCode.' | APICALL: '.$this->getLastUrl().']'."\n".var_export($result,true),$httpCode);
@@ -437,6 +473,17 @@ abstract class coreConnectBase
   public function getLastUrl():string
     {
     return $this->lastApiUrl;
+    }
+  
+  /**
+   * Default is to log all errors to PHP's error_log() call.
+   * Feel free to overwrite this method to disable logging.
+   * @param string $msg
+   * @return void
+   */
+  protected function errorLog(string $msg):void
+    {
+    error_log($msg);
     }
   
   }
