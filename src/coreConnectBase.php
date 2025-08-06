@@ -4,7 +4,7 @@
  * @package coreConnect
  * @author Sascha 'SieGeL' Pfalz <s.pfalz@inolares.de>
  * @copyright Inolares GmbH & Co. KG
- * @version 2.1.0 (11-Aug-2023)
+ * @version 2.1.1 (06-Aug-2025)
  * @license BSD
  */
 
@@ -23,7 +23,7 @@ use InvalidArgumentException;
 abstract class coreConnectBase
   {
   /** @var string Class version */
-  const CLASS_VERSION = '2.1.0';
+  const CLASS_VERSION = '2.1.1';
   
   /** @var array $addOptions Optional array with additional cURL options */
   private array $addOptions = [];
@@ -446,11 +446,11 @@ abstract class coreConnectBase
       {
       throw new Exception('Could not decode json: '.$this->jsonErrors[json_last_error()].' [HTTP code: '.$httpCode.' | APICALL: '.$this->getLastUrl().']'."\n".var_export($result,true),$httpCode);
       }
-    if (!isset($decodedResult['statusCode']))
+    if (array_key_exists('statusCode',$decodedResult) === false)
       {
       throw new BadMethodCallException("invalid response! [APICALL: {$this->getLastUrl()}]",$httpCode);
       }
-    if (!isset($decodedResult['data']))
+    if (array_key_exists('data',$decodedResult) === false)
       {
       $errmsg = "";
       if (array_key_exists('error', $decodedResult) && is_array($decodedResult['error']))

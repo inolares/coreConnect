@@ -24,10 +24,13 @@ try
   // We clear first our credentials list to allow testing new creds
   $cc->clearCredentials();
   $cc->init(getenv('CC_USER'),getenv('CC_PASS'),getenv('CC_HOST'));
+  $cc->setCurlOpts([CURLOPT_SSL_VERIFYPEER => false]);
   echo "\nTesting v1/ping:\n";
   print_r($cc->get("v1/ping"));
   echo "\nTesting v1/admin/versions:\n";
   print_r($cc->get('v1/admin/versions'));
+  echo "\nTesting v1/admin/data:\n";
+  print_r($cc->get('v1/admin/data/1754464844/1754464847?sort%5B0%5D%5Bproperty%5D=log_date&sort%5B0%5D%5Bdirection%5D=DESC&limit=1000&filter%5B0%5D%5Bproperty%5D=source_id&filter%5B0%5D%5Bexpression%5D=in&filter%5B0%5D%5Bvalue%5D=238669'));
   }
 catch(Exception $e)
   {

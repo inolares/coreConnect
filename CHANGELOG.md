@@ -1,3 +1,10 @@
+## 2.1.1
+
+#### 06-Aug-2025
+
+- Fixed check of data attribute, now array_key_exists() is used to allow to return NULL values
+
+
 ## 2.1.0
 
 #### 11-Aug-2023
